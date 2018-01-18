@@ -1,0 +1,17 @@
+{
+  "name": "svsi-stream-analyser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ansi-escapes": "^3.0.0",
+    "chalk": "^2.3.0",
+    "javascript-natural-sort": "^0.7.1",
+    "pcap-parser": "^0.2.1"
+  }
+}
