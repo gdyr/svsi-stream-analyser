@@ -1,4 +1,5 @@
 const nsort = require('javascript-natural-sort');
+const minimist = require('minimist');
 const pcap = require('pcap-parser');
 const esc = require('ansi-escapes');
 const chalk = require('chalk');
@@ -6,12 +7,19 @@ const fs = require('fs');
 
 console.log(chalk.blue('# Welcome to the SVSi analyser.'));
 
-if(!process.argv[2]) {
+var args = minimist(process.argv.slice(2), {
+  boolean: [ 'verbose' ],
+  alias: { v: 'verbose' }
+})
+
+var file = args._[0];
+
+if(!file) {
   console.log(chalk.red('> Please provide a .pcap file to analyse.'));
   return;
 }
 
-if(!fs.existsSync(process.argv[2])) {
+if(!fs.existsSync(file)) {
   console.log(chalk.red('> The specified file could not be found.'));
   return;
 }
@@ -21,13 +29,13 @@ process.stdout.write(esc.cursorSavePosition);
 
 console.log(chalk.blue('Loading PCAP file...\n'));
 
-var parser = pcap.parse(process.argv[2]);
+var parser = pcap.parse(file);
 
 const multicastHeader = new Buffer([0x01, 0x00, 0x5e]);
 
 var streams = {};
 
-var V = 0;
+var V = args.verbose ? 3 : 0; // verbosity
 
 var pcount = 0;
 
@@ -71,19 +79,25 @@ parser.on('packet', function(packet) {
     if(V > 4) { console.log(chalk.blue("> OK")); }
     if(diff > 1) {
       streams[ip].miss++;
-      if(V > 3) { console.log(chalk.red("> Missed chunk between packets " + streams[ip].lastRollingByte + " and " + rollingByte)); }
+      if(V > 2) { debug(chalk.red("> Missed chunk between packets " + streams[ip].lastRollingByte + " and " + rollingByte + " in stream " + streams[ip].friendly)); }
     } else if(diff == 0) {
       streams[ip].dup++;
-      if(V > 3) { console.log(chalk.red("> Duplicate packet " + rollingByte)); }
+      if(V > 3) { debug(chalk.red("> Duplicate packet " + rollingByte + " in stream " + streams[ip].friendly)); }
     } else if(diff < 0) {
       streams[ip].late++;
-      if(V > 3) { console.log(chalk.red("> Out of order packet " + rollingByte + " after " + streams[ip].lastRollingByte)); }
+      if(V > 3) { debug(chalk.red("> Out of order packet " + rollingByte + " after " + streams[ip].lastRollingByte + " in stream " + streams[ip].friendly)); }
     }
   }
 
   streams[ip].lastRollingByte = rollingByte;
 
 });
+
+function debug(str) {
+  process.stdout.write(esc.cursorUp(2));
+  process.stdout.write(esc.eraseDown);
+  console.log(str + '\n\n');
+}
 
 // Done
 parser.on('end', function (persist) {
