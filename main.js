@@ -79,13 +79,13 @@ parser.on('packet', function(packet) {
     if(V > 4) { console.log(chalk.blue("> OK")); }
     if(diff > 1) {
       streams[ip].miss++;
-      if(V > 2) { debug(chalk.red("> Missed chunk between packets " + streams[ip].lastRollingByte + " and " + rollingByte + " in stream " + streams[ip].friendly)); }
+      if(V > 2) { debug(chalk.red("> PID: " + pcount + " Missed chunk between packets " + streams[ip].lastRollingByte + " and " + rollingByte + " in stream " + streams[ip].friendly)); }
     } else if(diff == 0) {
       streams[ip].dup++;
-      if(V > 3) { debug(chalk.red("> Duplicate packet " + rollingByte + " in stream " + streams[ip].friendly)); }
+      if(V > 3) { debug(chalk.red("> PID: " + pcount + " Duplicate packet " + rollingByte + " in stream " + streams[ip].friendly)); }
     } else if(diff < 0) {
       streams[ip].late++;
-      if(V > 3) { debug(chalk.red("> Out of order packet " + rollingByte + " after " + streams[ip].lastRollingByte + " in stream " + streams[ip].friendly)); }
+      if(V > 3) { debug(chalk.red("> PID: " + pcount + " Out of order packet " + rollingByte + " after " + streams[ip].lastRollingByte + " in stream " + streams[ip].friendly)); }
     }
   }
 
